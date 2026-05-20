@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"time"
 	"errors"
+	"strconv"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -20,11 +21,11 @@ func HashPassword(password string) (string, error) {
 }
 
 // JWT生成
-func GenerateJWT(username string) (string,error){
+func GenerateJWT(username string) (string, error) {
 	// 生成JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"exp":  time.Now().Add(72 * time.Hour).Unix(),
+		"exp":      time.Now().Add(72 * time.Hour).Unix(),
 	})
 
 	// 签名JWT
@@ -51,7 +52,7 @@ func ParseJWT(tokenString string) (string, error) {
 
 	// 解析签名
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _,ok := token.Method.(*jwt.SigningMethodHMAC); !ok{
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected Signing Method")
 		}
 		return []byte(JWTSecret), nil
@@ -62,9 +63,9 @@ func ParseJWT(tokenString string) (string, error) {
 	}
 
 	// 验证JWT并提取用户名
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid{
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username, ok := claims["username"].(string)
-		if !ok{
+		if !ok {
 			return "", errors.New("username claim is not a string")
 		}
 		return username, nil
@@ -73,5 +74,18 @@ func ParseJWT(tokenString string) (string, error) {
 	return "", err
 }
 
+func ParsePagination(pageStr, sizeStr string) (int, int) {
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
 
-
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil || size < 1 {
+		size = 10
+	}
+	if size > 100 {
+		size = 100
+	}
+	return page, size
+}
