@@ -24,11 +24,6 @@ func CreateArticle(ctx *gin.Context) {
 		return
 	}
 
-	if err := global.DB.AutoMigrate(&article); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
 	if err := global.DB.Create(&article).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

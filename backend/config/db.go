@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"exchangeapp/backend/global"
+	"exchangeapp/backend/models"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -26,6 +27,11 @@ func InitDB() {
 
 	if err != nil {
 		log.Fatalf("Failed to configure database: %v", err)
+	}
+
+	err = db.AutoMigrate(&models.User{}, &models.Article{}, &models.ExchangeRate{})
+	if err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
 	global.DB = db

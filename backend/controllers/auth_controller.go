@@ -41,15 +41,6 @@ func Register(ctx *gin.Context) {
 	}
 
 
-	// 数据库迁移和用户创建
-	if err := global.DB.AutoMigrate(&user); err != nil	{
-		ctx.JSON(http.StatusInternalServerError,gin.H{
-			"err":err.Error(),
-		})
-		return
-	}
-
-
 	// 创建用户记录
 	if err := global.DB.Create(&user).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError,gin.H{
