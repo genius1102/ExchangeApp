@@ -3,13 +3,16 @@ package config
 import (
 	"log"
 
+	"exchangeapp/backend/utils"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	App struct {
-		Name string `yaml:"name"`
-		Port int    `yaml:"port"`
+		Name      string `yaml:"name"`
+		Port      int    `yaml:"port"`
+		JWTSecret string `yaml:"jwt_secret"`
 	}
 	Database struct {
 		Dsn string `yaml:"dsn"`
@@ -39,6 +42,8 @@ func InitConfig(){
 	if err := viper.Unmarshal(AppConfig); err != nil {
 		log.Fatalf("error unmarshalling config struct: %v",err)
 	}
+
+	utils.JWTSecret = AppConfig.App.JWTSecret
 
 	InitDB()
 	InitRedis()

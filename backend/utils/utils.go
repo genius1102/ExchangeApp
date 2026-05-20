@@ -8,6 +8,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var JWTSecret string
+
 // 密码加密
 func HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -26,7 +28,7 @@ func GenerateJWT(username string) (string,error){
 	})
 
 	// 签名JWT
-	signedToken , err := token.SignedString([]byte("secret"))
+	signedToken, err := token.SignedString([]byte(JWTSecret))
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +54,7 @@ func ParseJWT(tokenString string) (string, error) {
 		if _,ok := token.Method.(*jwt.SigningMethodHMAC); !ok{
 			return nil, errors.New("unexpected Signing Method")
 		}
-		return []byte("secret"), nil
+		return []byte(JWTSecret), nil
 	})
 
 	if err != nil {

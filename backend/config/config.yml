@@ -1,6 +1,7 @@
 app:
   name: CurrencyExchangeApp
   port: 8081
+  jwt_secret: "your-secret-key-change-in-production"
 
 database :
   dsn: root:123456@tcp(127.0.0.1:3306)/exchange?charset=utf8mb4&parseTime=True&loc=Local
