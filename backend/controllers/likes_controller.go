@@ -3,40 +3,61 @@ package controllers
 import (
 	"exchangeapp/backend/global"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 )
 
-func LikeArticle(ctx *gin.Context) {
+func ToggleLike(ctx *gin.Context) {
 	articleID := ctx.Param("id")
+	username, _ := ctx.Get("username")
 
+	userKey := "article:" + articleID + ":liked_users"
 	likeKey := "article:" + articleID + ":likes"
 
-	// 使用 Redis 的 INCR 命令增加点赞数,incr会自动创建键值
-	if err := global.RedisDB.Incr(likeKey).Err(); err != nil {
+	isMember, err := global.RedisDB.SIsMember(userKey, username.(string)).Result()
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "successfully liked the article!"})
+	if isMember {
+		global.RedisDB.SRem(userKey, username.(string))
+		global.RedisDB.Decr(likeKey)
+		ctx.JSON(http.StatusOK, gin.H{"liked": false, "message": "successfully unliked the article!"})
+		return
+	}
+
+	global.RedisDB.SAdd(userKey, username.(string))
+	global.RedisDB.Incr(likeKey)
+	ctx.JSON(http.StatusOK, gin.H{"liked": true, "message": "successfully liked the article!"})
 }
 
 func GetArticleLikes(ctx *gin.Context) {
 	articleID := ctx.Param("id")
+	username, _ := ctx.Get("username")
 
 	likeKey := "article:" + articleID + ":likes"
+	userKey := "article:" + articleID + ":liked_users"
 
-	likes, err := global.RedisDB.Get(likeKey).Result()
-
-	// 如果键不存在，Redis 会返回 redis.Nil 错误
+	likesStr, err := global.RedisDB.Get(likeKey).Result()
 	if err == redis.Nil {
-		ctx.JSON(http.StatusOK, gin.H{"likes": 0})
+		ctx.JSON(http.StatusOK, gin.H{"likes": 0, "liked": false})
 		return
-	} else if err != nil {
+	}
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"likes": likes})
+	likes, _ := strconv.Atoi(likesStr)
+
+	isMember, err := global.RedisDB.SIsMember(userKey, username.(string)).Result()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"likes": likes, "liked": isMember})
 }

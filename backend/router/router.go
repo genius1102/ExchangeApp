@@ -14,7 +14,7 @@ func SetUpRouter() *gin.Engine {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"POST", "GET" , "OPTIONS"},
+		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
@@ -36,7 +36,7 @@ func SetUpRouter() *gin.Engine {
 		api.GET("/articles", controllers.GetArticles)
 		api.GET("/articles/:id", controllers.GetArticleByID)
 
-		api.POST("/articles/:id/likes", controllers.LikeArticle)
+		api.POST("/articles/:id/likes", controllers.ToggleLike)
 		api.GET("/articles/:id/likes", controllers.GetArticleLikes)
 	}
 
