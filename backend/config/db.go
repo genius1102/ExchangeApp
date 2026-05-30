@@ -20,14 +20,13 @@ func InitDB() {
 	}
 
 	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("Failed to get database instance: %v", err)
+	}
 
 	sqlDB.SetMaxIdleConns(AppConfig.Database.MaxIdleConns)
 	sqlDB.SetMaxOpenConns(AppConfig.Database.MaxOpenConns)
 	sqlDB.SetConnMaxLifetime(100 * time.Second)
-
-	if err != nil {
-		log.Fatalf("Failed to configure database: %v", err)
-	}
 
 	err = db.AutoMigrate(&models.User{}, &models.Article{}, &models.ExchangeRate{})
 	if err != nil {

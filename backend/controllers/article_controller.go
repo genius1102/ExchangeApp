@@ -35,10 +35,12 @@ func CreateArticle(ctx *gin.Context) {
 	}
 
 	// 删除缓存,防止用户在缓存有效期内浏览文章列表看不到新增的文章
+	// 缓存删除失败不影响主流程，仅记录日志（缓存有10分钟TTL会自动过期）
 	for i := 0; i < maxChangePages; i++ {
 		cacheKey := fmt.Sprintf("articles:page:%d:size:%d", i, defaultPageSize)
 		if err := global.RedisDB.Del(cacheKey).Err(); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			// 不要返回错误给客户端，因为文章已经创建成功
+			fmt.Printf("warn: failed to delete cache key %s: %v\n", cacheKey, err)
 		}
 	}
 

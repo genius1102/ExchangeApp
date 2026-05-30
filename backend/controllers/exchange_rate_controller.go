@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 	"exchangeapp/backend/models"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func CreateExchangeRate(ctx *gin.Context) {
@@ -37,12 +35,7 @@ func GetExchangeRates(ctx *gin.Context) {
 
 	// 从数据库查询所有汇率记录
 	if err := global.DB.Find(&exchangeRates).Error; err != nil {
-		if errors.Is(err,gorm.ErrRecordNotFound){
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "No exchange rates found"})
-			return
-		}else{
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
