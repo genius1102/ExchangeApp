@@ -5,6 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"exchangeapp/backend/global"
+	"exchangeapp/backend/repository"
+	"exchangeapp/backend/services"
 	"exchangeapp/backend/utils"
 
 	"github.com/spf13/viper"
@@ -68,5 +71,15 @@ func InitConfig(){
 
 	InitDB()
 	InitRedis()
+
+	// 初始化 Service 层（依赖注入链：DB → Repository → Service）
+	articleRepo := repository.NewArticleRepository(global.DB)
+	userRepo := repository.NewUserRepository(global.DB)
+	exchangeRateRepo := repository.NewExchangeRateRepository(global.DB)
+
+	global.ArticleSvc = services.NewArticleService(articleRepo, global.RedisDB)
+	global.AuthSvc = services.NewAuthService(userRepo)
+	global.ExchangeRateSvc = services.NewExchangeRateService(exchangeRateRepo)
+	global.LikeSvc = services.NewLikeService(global.RedisDB)
 
 }

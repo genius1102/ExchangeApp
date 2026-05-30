@@ -9,7 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var JWTSecret string
+var (
+	JWTSecret         string
+	ErrInvalidPassword = errors.New("invalid password")
+	ErrUserNotFound    = errors.New("user not found")
+)
 
 // 密码加密
 func HashPassword(password string) (string, error) {
