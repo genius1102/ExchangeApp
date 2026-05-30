@@ -22,6 +22,7 @@ func ToggleLike(ctx *gin.Context) {
 		return
 	}
 
+	// 如果在集合中
 	if isMember {
 		global.RedisDB.SRem(userKey, username.(string))
 		global.RedisDB.Decr(likeKey)

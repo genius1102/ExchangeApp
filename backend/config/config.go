@@ -2,6 +2,8 @@ package config
 
 import (
 	"log"
+	"os"
+	"strconv"
 
 	"exchangeapp/backend/utils"
 
@@ -41,6 +43,25 @@ func InitConfig(){
 
 	if err := viper.Unmarshal(AppConfig); err != nil {
 		log.Fatalf("error unmarshalling config struct: %v",err)
+	}
+
+	if dsn := os.Getenv("DB_DSN"); dsn != "" {
+		AppConfig.Database.Dsn = dsn
+	}
+	if addr := os.Getenv("REDIS_ADDR"); addr != "" {
+		AppConfig.Redis.Addr = addr
+	}
+	if password := os.Getenv("REDIS_PASSWORD"); password != "" {
+		AppConfig.Redis.Password = password
+	}
+	if db := os.Getenv("REDIS_DB"); db != "" {
+		dbInt, err := strconv.Atoi(db)
+		if err == nil {
+			AppConfig.Redis.DB = dbInt
+		}
+	}
+	if secret := os.Getenv("JWT_SECRET"); secret != "" {
+		AppConfig.App.JWTSecret = secret
 	}
 
 	utils.JWTSecret = AppConfig.App.JWTSecret

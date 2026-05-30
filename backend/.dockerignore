@@ -1,0 +1,7 @@
+.git
+*.exe
+*.test
+*.out
+vendor/
+node_modules/
+Exchangeapp_frontend/
